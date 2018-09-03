@@ -100,7 +100,7 @@ DriveStatus Rover::drive( const Odometry& destination )
 	{
 		return DriveStatus::Arrived;
 	}
-	if( bearing < mRoverConfig[ "drivingBearingThresh" ].GetDouble() )
+	if( fabs( bearing - mRoverStatus.odometry().bearing_deg ) < mRoverConfig[ "drivingBearingThresh" ].GetDouble() )
 	{
 		double distanceEffort = mDistancePid.update( -1 * distance, 0 );
 		double destinationBearing = calcBearing( mRoverStatus.odometry(), destination );
@@ -125,6 +125,7 @@ DriveStatus Rover::drive( const double distance, const double bearing )
 		printf("arrived\n");
 		return DriveStatus::Arrived;
 	}
+	// todo: check if this bearing needs to be subtracted from the current bearing and if we need fabs()
 	if( bearing < mRoverConfig[ "drivingBearingThresh" ].GetDouble() )
 	{
 		double distanceEffort = mDistancePid.update( -1 * distance, 0 );
@@ -146,11 +147,10 @@ bool Rover::turn( Odometry& destination )
 {
 	double bearing = calcBearing( mRoverStatus.odometry(), destination );
 	// std::cout << bearing - mRoverStatus.odometry().bearing_deg << "\n";
-	if( ( bearing - mRoverStatus.odometry().bearing_deg ) < fabs( mRoverConfig[ "turningBearingThresh" ].GetDouble() ) )
+	if( fabs( bearing - mRoverStatus.odometry().bearing_deg ) < mRoverConfig[ "turningBearingThresh" ].GetDouble() )
 	{
 		return true;
 	}
-
 	double destinationBearing = calcBearing( mRoverStatus.odometry(), destination );
 	throughZero( destinationBearing, mRoverStatus.odometry().bearing_deg );
 	double turningEffort = mBearingPid.update( mRoverStatus.odometry().bearing_deg, destinationBearing );
@@ -163,7 +163,7 @@ bool Rover::turn( Odometry& destination )
 // otherwise.
 bool Rover::turn( double bearing )
 {
-	if( bearing < fabs( mRoverConfig[ "turningBearingThresh" ].GetDouble() ) )
+	if( fabs( bearing - mRoverStatus.odometry().bearing_deg ) < mRoverConfig[ "turningBearingThresh" ].GetDouble() )
 	{
 		return true;
 	}

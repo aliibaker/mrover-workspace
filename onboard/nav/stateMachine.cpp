@@ -227,8 +227,12 @@ NavState StateMachine::executeOff()
 // rover.
 NavState StateMachine::executeDone()
 {
+	if( !mPhoebe->roverStatus().autonState().is_auton )
+	{
+		return NavState::Off;
+	}
 	mPhoebe->stop();
-	return NavState::Off;
+	return NavState::Done;
 } // executeDone()
 
 // Executes the logic for the turning. If the rover is turned off, it
@@ -242,6 +246,10 @@ NavState StateMachine::executeTurn()
 	}
 	if( mPhoebe->roverStatus().path().empty() )
 	{
+<<<<<<< HEAD
+=======
+		printf("go to done\n");
+>>>>>>> [nav] Refactor
 		return NavState::Done;
 	}
 
